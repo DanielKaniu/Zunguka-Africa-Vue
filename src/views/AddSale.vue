@@ -1,5 +1,6 @@
 <template>
   <div class="add-sale">
+    <h2>Zunguka Safari Entries</h2>
     <Toast />
     <div class="button-container">
       <Button label="Add Row" @click="addRow" class="p-button-primary" rounded/>
@@ -18,7 +19,8 @@
           </div>
         </template>
         <template #editor="{ data, field }">
-          <InputText v-if="['checkIn', 'checkOut', 'Payment_Date'].includes(field)" v-model="data[field]" placeholder="YYYY-MM-DD" @input="validateDateInput($event, data, field)" />
+          <InputText v-if="['checkIn', 'checkOut', 'date'].includes(field)" v-model="data[field]" placeholder="YYYY-MM-DD" @input="validateDateInput($event, data, field)" />
+          <InputText v-else-if="field === 'phone'" v-model="data[field]" type="tel" />
           <InputNumber v-else-if="numberFields.includes(field)" v-model="data[field]" :disabled="disabledFields.includes(field)" />
           <ToggleButton v-else-if="field === 'isTripComplete'" v-model="data[field]" onLabel="Yes" offLabel="No" onIcon="pi pi-check" offIcon="pi pi-times" :style="{ width: '100%' }" />
           <InputText v-else v-model="data[field]" />
@@ -55,26 +57,27 @@ export default {
     const columns = [
       { field: 'invoice', header: 'Invoice' },
       { field: 'name', header: 'Name' },
+      { field: 'phone', header: 'Phone' },
       { field: 'numberOfPeople', header: 'No. of People' },
       { field: 'checkIn', header: 'Check In' },
       { field: 'checkOut', header: 'Check Out' },
-      { field: 'Trip_Cost', header: 'Trip Cost' },
-      { field: 'Trip_Payment', header: 'Trip Payment' },
+      { field: 'visit_charge', header: 'Trip Cost' },
+      { field: 'visit_payment', header: 'Trip Payment' },
       { field: 'Client_Balance', header: 'Client Balance' },
       { field: 'hotelName', header: 'Hotel Name' },
-      { field: 'Hotel_Charge', header: 'Hotel Cost' },
-      { field: 'Hotel_Payment', header: 'Hotel Payment' },
+      { field: 'hotel_charge', header: 'Hotel Cost' },
+      { field: 'hotel_payment', header: 'Hotel Payment' },
       { field: 'Hotel_Balance', header: 'Hotel Balance' },
       { field: 'Ref_Number', header: 'Ref Number' },
-      { field: 'Payment_Date', header: 'Payment Date' },
-      { field: 'Park', header: 'Park' },
-      { field: 'Transport', header: 'Transport' },
-      { field: 'Visa', header: 'Visa' },
-      { field: 'Water', header: 'Water' },
-      { field: 'Sgr', header: 'Sgr' },
-      { field: 'Flight', header: 'Flight' },
-      { field: 'Transfer', header: 'Transfer' },
-      { field: 'Excursion', header: 'Excursion' },
+      { field: 'date', header: 'Payment Date' },
+      { field: 'park', header: 'Park' },
+      { field: 'transport', header: 'Transport' },
+      { field: 'visa', header: 'Visa' },
+      { field: 'water', header: 'Water' },
+      { field: 'sgr', header: 'Sgr' },
+      { field: 'flight', header: 'Flight' },
+      { field: 'transfer', header: 'Transfer' },
+      { field: 'excursion', header: 'Excursion' },
       { field: 'Paid_To_Supplier', header: 'Paid To Supplier' },
       { field: 'Profit', header: 'Profit' },
       { field: 'Profit_Loss', header: 'Profit/Loss' },
@@ -92,26 +95,27 @@ export default {
         id: 0,
         invoice: '',
         name: '',
+        phone: '',
         numberOfPeople: null,
         checkIn: '',
         checkOut: '',
-        Trip_Cost: null,
-        Trip_Payment: null,
+        visit_charge: null,
+        visit_payment: null,
         Client_Balance: null,
         hotelName: '',
-        Hotel_Charge: null,
-        Hotel_Payment: null,
+        hotel_charge: null,
+        hotel_payment: null,
         Hotel_Balance: null,
         Ref_Number: '',
-        Payment_Date: '',
-        Park: null,
-        Transport: null,
-        Visa: null,
-        Water: null,
-        Sgr: null,
-        Flight: null,
-        Transfer: null,
-        Excursion: null,
+        date: '',
+        park: null,
+        transport: null,
+        visa: null,
+        water: null,
+        sgr: null,
+        flight: null,
+        transfer: null,
+        excursion: null,
         Paid_To_Supplier: null,
         Profit: null,
         Profit_Loss: '',
@@ -121,19 +125,19 @@ export default {
 
     const requiredFields = [
       'name', 'checkIn', 'checkOut', 'hotelName',
-      'numberOfPeople', 'Trip_Cost', 'Trip_Payment', 'Hotel_Charge', 'Hotel_Payment'
+      'numberOfPeople', 'visit_charge', 'visit_payment', 'hotel_charge', 'hotel_payment'
     ];
 
     const numberFields = [
-      'numberOfPeople', 'Trip_Cost', 'Trip_Payment', 'Client_Balance',
-      'Hotel_Charge', 'Hotel_Payment', 'Hotel_Balance', 'Paid_To_Supplier', 'Profit',
-      'Park', 'Transport', 'Visa', 'Water', 'Sgr', 'Flight', 'Transfer', 'Excursion'
+      'numberOfPeople', 'visit_charge', 'visit_payment', 'Client_Balance',
+      'hotel_charge', 'hotel_payment', 'Hotel_Balance', 'Paid_To_Supplier', 'Profit',
+      'park', 'transport', 'visa', 'water', 'sgr', 'flight', 'transfer', 'excursion'
     ];
 
     const disabledFields = ['Client_Balance', 'Hotel_Balance', 'Paid_To_Supplier', 'Profit', 'Profit_Loss'];
 
     const paidToSupplierFields = [
-      'Hotel_Payment', 'Park', 'Transport', 'Visa', 'Water', 'Sgr', 'Flight', 'Transfer', 'Excursion'
+      'hotel_payment', 'park', 'transport', 'visa', 'water', 'sgr', 'flight', 'transfer', 'excursion'
     ];
 
     onMounted(() => {
@@ -159,12 +163,12 @@ export default {
     };
 
     const calculateBalances = (data) => {
-      data.Client_Balance = (data.Trip_Cost || 0) - (data.Trip_Payment || 0);
-      data.Hotel_Balance = (data.Hotel_Charge || 0) - (data.Hotel_Payment || 0);
+      data.Client_Balance = (data.visit_charge || 0) - (data.visit_payment || 0);
+      data.Hotel_Balance = (data.hotel_charge || 0) - (data.hotel_payment || 0);
       
       data.Paid_To_Supplier = paidToSupplierFields.reduce((sum, field) => sum + (data[field] || 0), 0);
       
-      data.Profit = (data.Trip_Cost || 0) - (data.Paid_To_Supplier || 0);
+      data.Profit = (data.visit_charge || 0) - (data.Paid_To_Supplier || 0);
       data.Profit_Loss = data.Profit > 0 ? 'Profit' : 'Loss';
     };
 
@@ -269,23 +273,23 @@ export default {
             numberOfPeople: null,
             checkIn: '',
             checkOut: '',
-            Trip_Cost: null,
-            Trip_Payment: null,
+            visit_charge: null,
+            visit_payment: null,
             Client_Balance: null,
             hotelName: '',
-            Hotel_Charge: null,
-            Hotel_Payment: null,
+            hotel_charge: null,
+            hotel_payment: null,
             Hotel_Balance: null,
             Ref_Number: '',
-            Payment_Date: '',
-            Park: null,
-            Transport: null,
-            Visa: null,
-            Water: null,
-            Sgr: null,
-            Flight: null,
-            Transfer: null,
-            Excursion: null,
+            date: '',
+            park: null,
+            transport: null,
+            visa: null,
+            water: null,
+            sgr: null,
+            flight: null,
+            transfer: null,
+            excursion: null,
             Paid_To_Supplier: null,
             Profit: null,
             Profit_Loss: '',
@@ -302,7 +306,7 @@ export default {
     };
 
     const formatCellValue = (value, field) => {
-      if (['checkIn', 'checkOut', 'Payment_Date'].includes(field)) {
+      if (['checkIn', 'checkOut', 'date'].includes(field)) {
         return value || '';
       }
       if (numberFields.includes(field) && typeof value === 'number') {
@@ -338,8 +342,13 @@ export default {
 .add-sale {
   background-color: #fff;
   padding: 20px;
+  margin-top: 5%;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2{
+  color: #000;
 }
 
 .button-container {

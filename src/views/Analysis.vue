@@ -6,10 +6,9 @@
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
 
-      <!-- Sales Profit -->
+      <!-- Sales and Profit -->
       <div class="card">
-        <h2>Sales Profit (Last 12 Months)</h2>
-        <!-- Uncomment this when Chart is properly set up -->
+        <h2>Sales and Profit (Last 12 Months)</h2>
         <Chart type="line" :data="salesProfitChartData" :options="chartOptions" />
       </div>
 
@@ -98,6 +97,7 @@ export default {
     });
     const popularHotels = ref([]);
     const salesProfit = ref([]);
+    const profitData = ref([]);
     const loading = ref(true);
     const error = ref(null);
 
@@ -108,13 +108,20 @@ export default {
 
         const businessName = 'Zunguka Africa Safaris'; // Replace with actual business name or fetch it from user state
 
-        const [topClientsRes, bookingPerformanceRes, paymentPerformanceRes, popularHotelsRes, salesProfitRes] = await Promise.all([
-        axiosInstance.post('/report/getTopClients', {  businessName  }),
-        axiosInstance.post('/report/getThisMonthsBookingPerformance', { businessName }),
-        axiosInstance.post('/report/getThisMonthsPaymentPerformance', { businessName }),
-          axiosInstance.post('/report/getPopularHotels', { businessName }),
-          axiosInstance.post('/report/getSalesProfit', {  businessName })
+        const [topClientsRes, bookingPerformanceRes, paymentPerformanceRes, popularHotelsRes] = await Promise.all([
+          axiosInstance.post('/report/getTopClients', {  businessName  }),
+          axiosInstance.post('/report/getThisMonthsBookingPerformance', { businessName }),
+          axiosInstance.post('/report/getThisMonthsPaymentPerformance', { businessName }),
+          axiosInstance.post('/report/getPopularHotels', { businessName })
         ]);
+        //
+        //Get sales data and profit.
+        const [salesProfitRes, profitDataRes] = await Promise.all([
+          axiosInstance.get('/report/getSales', { businessName }),
+          axiosInstance.get('/report/getProfit', { businessName })
+        ]);
+        salesProfit.value = salesProfitRes.data.data;
+        profitData.value = profitDataRes.data.data;
 
         topClients.value = topClientsRes.data.data;
         bookingPerformance.value = {
@@ -162,9 +169,15 @@ export default {
       labels: salesProfit.value.map(item => item.Month),
       datasets: [
         {
-          label: 'Sales Profit',
+          label: 'Sales',
           data: salesProfit.value.map(item => item.Amount),
           borderColor: '#FFA726',
+          fill: false
+        },
+        {
+          label: 'Profit',
+          data: profitData.value.map(item => item.Profit),
+          borderColor: '#66BB6A',
           fill: false
         }
       ]
@@ -181,6 +194,7 @@ export default {
       paymentPerformance,
       popularHotels,
       salesProfit,
+      profitData,
       weeklyChartData,
       salesProfitChartData,
       chartOptions,

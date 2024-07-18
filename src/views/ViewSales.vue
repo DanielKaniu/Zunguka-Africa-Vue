@@ -1,7 +1,15 @@
 <template>
+    <h2>Zunguka Trips Planner</h2>
   <div class="sales-table-container">
     <Toast />
     <ConfirmDialog />
+    <!-- 
+    Filter inputs -->
+    <div class="filter-container">
+      <InputText v-model="filters.name" placeholder="Filter by name" @input="applyFilters" />
+      <Calendar v-model="filters.checkIn" placeholder="Filter by check-in date" @date-select="applyFilters" />
+      <Calendar v-model="filters.checkOut" placeholder="Filter by check-out date" @date-select="applyFilters" />
+    </div>
     <DataTable
         v-model:editingRows="editingRows"
       :value="salesData"
@@ -16,8 +24,8 @@
       scrollable
       scrollDirection="both"
       :paginator="true"
-      :rowsPerPageOptions="[5, 10, 20, 50]"
-      @page="onPageChange"
+      @page="onPage"
+      :rowsPerPageOptions="[5, 10, 20, 50]" 
       :first="(currentPage - 1) * perPage"
     >
     <Column
@@ -75,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive  } from 'vue';
 import axiosInstance from '../axiosInstance';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
@@ -83,6 +91,7 @@ import PaymentHistoryPopup from './PaymentHistoryPopup.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
+import Calendar from 'primevue/calendar';
 import ToggleButton from 'primevue/togglebutton';
 import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -101,6 +110,12 @@ const currentPage = ref(1);
 const paymentHistoryVisible = ref(false);
 const selectedVisitId = ref(null);
 const selectedPaymentType = ref('');
+
+const filters = reactive({
+  name: '',
+  checkIn: null,
+  checkOut: null,
+});
 
 // Define columns with their editability status
 const columns = [
@@ -137,15 +152,37 @@ const columns = [
 onMounted(() => {
   loadData();
 });
-
+//
+const onPage = (event) => {
+  if (event.rows !== perPage.value) {
+    perPage.value = event.rows;
+    loadData(1);
+  } else {
+    loadData(event.page + 1);
+  }
+};
+//
 // Load initial data
 const loadData = async (page = 1) => {
   loading.value = true;
+  //
+  //Adjust the selected date.
+  const adjustDate = (date) => {
+    if (date) {
+      const adjusted = new Date(date);
+      adjusted.setDate(adjusted.getDate() + 1);
+      return adjusted.toISOString().split('T')[0];
+    }
+    return null;
+  };
   try {
     const response = await axiosInstance.post('/sales/getSalesReport', {
       businessName: 'Zunguka Africa Safaris',
       page: page,
-      perPage: perPage.value
+      perPage: perPage.value,
+      filterName: filters.name,
+      filterCheckIn: adjustDate(filters.checkIn),
+      filterCheckOut: adjustDate(filters.checkOut),
     });
     salesData.value = response.data.data.map(item => ({
       ...item,
@@ -161,8 +198,9 @@ const loadData = async (page = 1) => {
   }
 };
 
-const onPageChange = (event) => {
-  loadData(event.page + 1);
+const applyFilters = () => {
+  currentPage.value = 1;
+  loadData();
 };
 
 const onTripCompleteChange = async (rowData) => {
@@ -408,6 +446,11 @@ const deleteRow = async (rowData) => {
   flex-direction: column;
 }
 
+h2{
+  margin-top: -3%;
+  color: #000;
+}
+
 ::v-deep .p-datatable {
   flex: 1;
 }
@@ -586,12 +629,28 @@ const deleteRow = async (rowData) => {
   border-color: #c4b600;
 }
 
+::v-deep .p-button-text{
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
 ::v-deep .p-button.p-button-danger.p-button-text {
-  color: #ef4444;
+  color: #c4b600;
 }
 
 ::v-deep .p-button.p-button-danger.p-button-text:hover {
   background: rgba(239, 68, 68, 0.04);
   color: #dc2626;
+}
+
+.filter-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filter-container .p-inputtext,
+.filter-container .p-calendar {
+  flex: 1;
 }
 </style>

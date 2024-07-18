@@ -2,12 +2,11 @@ import axios, { AxiosRequestHeaders, InternalAxiosRequestConfig } from 'axios';
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  // baseURL: 'http://localhost:8000/api',
-  baseURL: 'http://api.zunguka.africa/api/',
+  baseURL: 'http://localhost:8000/api',
+  // baseURL: 'http://api.zunguka.africa/api/',
   headers: {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': `*`,
-    // Add other headers as necessary
   }
 });
 

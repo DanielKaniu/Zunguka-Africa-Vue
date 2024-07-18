@@ -1,6 +1,7 @@
 <template>
   <Toast />
     <div class="client-reminders">
+      <h2>Balance Buddy: Friendly SMS Payment Reminders</h2>
       <!-- DataTable for displaying clients with arrears -->
       <DataTable 
         :value="clientsWithArrears" 
@@ -96,7 +97,12 @@
 
     // Update the onPage function
     const onPage = (event) => {
-    loadData(event.page + 1);
+      if (event.rows !== perPage.value) {
+        perPage.value = event.rows;
+        loadData(1);
+      } else {
+        loadData(event.page + 1);
+      }
     };
   
   // Load data on component mount
@@ -152,7 +158,14 @@
   </script>
   
   <style scoped> 
-  
+  .client-reminders{
+    margin-top: 3%;
+  } 
+
+  h2{
+    color: #000;
+  }
+
   /* Custom styles for DataTable */
   :deep(.p-datatable) {
     border: 1px solid #004684; /* Primary color border */

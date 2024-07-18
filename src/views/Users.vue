@@ -1,6 +1,6 @@
 <template>
     <div class="users-container">
-      
+      <h2>Zunguka Squad Central</h2>      
       <DataTable :value="users" :paginator="true" :rows="10" dataKey="User_Name"
                  class="custom-table" :rowHover="true">
         <Column field="User_Name" header="Username" sortable></Column>
@@ -127,7 +127,9 @@
     background-color: #fff;
     color: #004682;
   }
-  
+  h2{
+    color: #000;
+  }
   .custom-table {
     font-family: Arial, sans-serif;
   }

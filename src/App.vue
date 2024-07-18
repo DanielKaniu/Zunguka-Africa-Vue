@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <MenuBar @logout="handleLogout"/>
+    <MenuBar @logout="handleLogout" ref="menuBar"/>
     <main class="main-content">
       <router-view></router-view>
     </main>
@@ -18,11 +18,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import MenuBar  from './components/MenuBar.vue';
+import MenuBar from './components/MenuBar.vue';
 import SpeedDial from 'primevue/speeddial';
 
 const router = useRouter();
+const menuBar = ref<InstanceType<typeof MenuBar> | null>(null);
 
 const items = [
   {
@@ -63,21 +65,21 @@ const handleLogout = () => {
 
 <style scoped>
 .app-container {
-  padding-top: 60px;
   position: relative;
   min-height: 100vh;
+  padding-top: 3rem; /* Adjust this value to match your menu bar height */
 }
 
 .main-content {
-  margin-top: 7vh;
   width: 90vw;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* SpeedDial Styles */
 :deep(.p-speeddial) {
-  position: fixed !important; /* Force fixed positioning */
-  bottom: 20px !important; /* Position from bottom */
-  left: 20px !important; /* Position from left */
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 20px !important;
   z-index: 9999;
 }
 
@@ -121,13 +123,11 @@ const handleLogout = () => {
   font-size: 1rem;
 }
 
-/* Social media icon colors */
 :deep(.p-speeddial-action .pi-facebook) { color: #1877F2; }
 :deep(.p-speeddial-action .pi-instagram) { color: #E4405F; }
 :deep(.p-speeddial-action .pi-tiktok) { color: #000000; }
 :deep(.p-speeddial-action .pi-twitter) { color: #1DA1F2; }
 
-/* Ensure the actions appear within the viewport */
 :deep(.p-speeddial-list) {
   padding: 0;
   margin: 0;

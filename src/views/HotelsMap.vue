@@ -1,7 +1,7 @@
 <template>
     <div class="container">
       <div class="sidebar">
-        <h2>Options</h2>
+        <h2>Hotel Finder</h2>
         <div class="p-fluid">
           <div class="p-field">
             <AutoComplete
@@ -244,9 +244,10 @@ const selectHotel = (event) => {
   }
   
   .container {
-    margin-top: -1%;
+    margin-top: 1%;
     display: flex;
-    height: 85vh;
+    width: 94vw;
+    height: 90vh;
   }
   
   .sidebar {
